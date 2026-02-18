@@ -174,7 +174,7 @@ const App = () => {
 
   return (
     <div className="flex flex-col h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden">
-      <header className="bg-white border-b px-8 py-4 flex justify-between items-center z-50 shrink-0">
+      <header className="bg-white border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col lg:flex-row justify-between gap-3 lg:gap-0 lg:items-center z-50 shrink-0">
         <div className="flex items-center gap-3">
           <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-100">
             <Store className="text-white w-6 h-6" />
@@ -182,13 +182,13 @@ const App = () => {
           <span className="font-black text-xl tracking-tight text-slate-800 uppercase">T-Order <span className="text-indigo-500">Premium</span></span>
         </div>
         
-        <div className="flex items-center gap-6">
-            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 w-full lg:w-auto justify-between lg:justify-end">
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto">
                 {['ko', 'en', 'ja', 'zh'].map(l => (
                     <button key={l} onClick={() => setLang(l)} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${lang === l ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}>{TRANSLATIONS[l].lang}</button>
                 ))}
             </div>
-            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
                 <button onClick={() => setActiveView('customer')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeView === 'customer' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}><Users size={16}/> User</button>
                 <button onClick={() => setActiveView('admin')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeView === 'admin' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}><LayoutDashboard size={16}/> Admin</button>
             </div>
@@ -197,30 +197,32 @@ const App = () => {
 
       <main className="flex-1 overflow-hidden relative">
         {activeView === 'customer' ? (
-          <div className="flex h-full animate-in fade-in duration-500">
-            <aside className="w-24 bg-slate-900 text-white flex flex-col py-8 items-center gap-10 shrink-0">
+          <div className="flex h-full flex-col lg:flex-row animate-in fade-in duration-500 overflow-hidden">
+            <aside className="w-full lg:w-24 bg-slate-900 text-white flex lg:flex-col py-3 lg:py-8 px-4 lg:px-0 items-center justify-between lg:justify-start gap-4 lg:gap-10 shrink-0">
+              <div className="flex items-center gap-6 lg:flex-col lg:gap-10">
               <button onClick={() => setActiveCategory('Main')} className={`flex flex-col items-center gap-2 ${activeCategory === 'Main' ? 'text-indigo-400' : 'text-slate-500'}`}><Utensils size={24} /><span className="text-[10px] font-bold">{t.main}</span></button>
               <button onClick={() => setActiveCategory('Side')} className={`flex flex-col items-center gap-2 ${activeCategory === 'Side' ? 'text-indigo-400' : 'text-slate-500'}`}><Pizza size={24} /><span className="text-[10px] font-bold">{t.side}</span></button>
               <button onClick={() => setActiveCategory('Drink')} className={`flex flex-col items-center gap-2 ${activeCategory === 'Drink' ? 'text-indigo-400' : 'text-slate-500'}`}><Beer size={24} /><span className="text-[10px] font-bold">{t.drink}</span></button>
-              <div className="mt-auto space-y-8 pb-4">
+              </div>
+              <div className="flex items-center gap-6 lg:flex-col lg:mt-auto lg:space-y-8 lg:gap-0 lg:pb-4">
                 <button onClick={handleAiRecommend} className="flex flex-col items-center text-indigo-400 animate-pulse"><Sparkles size={24} /><span className="text-[10px] font-bold mt-1">AI</span></button>
                 <button onClick={() => setShowCallModal(true)} className="flex flex-col items-center text-slate-500"><Bell size={24} /><span className="text-[10px] font-bold mt-1">CALL</span></button>
               </div>
             </aside>
 
-            <section className="flex-1 bg-white p-10 overflow-y-auto">
+            <section className="flex-1 bg-white p-4 sm:p-6 lg:p-10 overflow-y-auto">
                 <div className="max-w-4xl mx-auto">
-                    <div className="mb-10 flex justify-between items-center">
-                        <h2 className="text-4xl font-black text-slate-900">{activeCategory === 'Main' ? t.dining : activeCategory === 'Side' ? t.sideDish : t.drinkRec}</h2>
-                        <div className="px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full font-bold border border-indigo-100">{t.table} 05</div>
+                    <div className="mb-6 sm:mb-8 lg:mb-10 flex justify-between items-center gap-3">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900">{activeCategory === 'Main' ? t.dining : activeCategory === 'Side' ? t.sideDish : t.drinkRec}</h2>
+                        <div className="px-4 sm:px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full font-bold border border-indigo-100 text-sm sm:text-base">{t.table} 05</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                         {MENU_DATA.filter(m => m.category === activeCategory).map(item => (
-                            <div key={item.id} onClick={() => setCart([...cart, item])} className="p-6 bg-slate-50 rounded-[2.5rem] border-2 border-transparent hover:border-indigo-500 hover:bg-white transition-all cursor-pointer flex items-center gap-6 group">
-                                <div className="text-5xl group-hover:scale-110 transition-transform">{item.img}</div>
+                            <div key={item.id} onClick={() => setCart([...cart, item])} className="p-4 sm:p-5 lg:p-6 bg-slate-50 rounded-[1.8rem] sm:rounded-[2.5rem] border-2 border-transparent hover:border-indigo-500 hover:bg-white transition-all cursor-pointer flex items-center gap-4 sm:gap-5 lg:gap-6 group">
+                                <div className="text-4xl sm:text-5xl group-hover:scale-110 transition-transform">{item.img}</div>
                                 <div>
-                                    <div className="font-black text-xl">{item.name[lang]}</div>
-                                    <div className="text-indigo-600 font-black mt-1 text-lg">{item.price.toLocaleString()}원</div>
+                                    <div className="font-black text-base sm:text-lg lg:text-xl">{item.name[lang]}</div>
+                                    <div className="text-indigo-600 font-black mt-1 text-base sm:text-lg">{item.price.toLocaleString()}원</div>
                                 </div>
                             </div>
                         ))}
@@ -228,8 +230,8 @@ const App = () => {
                 </div>
             </section>
 
-            <aside className="w-96 bg-slate-50 border-l flex flex-col p-8">
-                <h3 className="text-2xl font-black mb-8">{t.orderList}</h3>
+            <aside className="w-full lg:w-96 bg-slate-50 border-t lg:border-t-0 lg:border-l flex flex-col p-4 sm:p-6 lg:p-8 max-h-[42vh] lg:max-h-none">
+                <h3 className="text-xl sm:text-2xl font-black mb-4 sm:mb-6 lg:mb-8">{t.orderList}</h3>
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                     {cart.map((item, idx) => (
                         <div key={idx} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-center animate-in slide-in-from-right-4">
@@ -239,17 +241,17 @@ const App = () => {
                     ))}
                     {cart.length === 0 && <div className="h-full flex items-center justify-center text-slate-300 font-bold">{t.empty}</div>}
                 </div>
-                <div className="mt-8 pt-6 border-t border-slate-200">
-                    <div className="flex justify-between items-end mb-6">
+                <div className="mt-5 sm:mt-6 lg:mt-8 pt-4 sm:pt-5 lg:pt-6 border-t border-slate-200">
+                    <div className="flex justify-between items-end mb-4 sm:mb-5 lg:mb-6">
                         <span className="text-slate-400 font-bold uppercase text-xs tracking-widest">{t.total}</span>
-                        <span className="text-3xl font-black text-indigo-600">{cart.reduce((s,i)=>s+i.price,0).toLocaleString()}원</span>
+                        <span className="text-2xl sm:text-3xl font-black text-indigo-600">{cart.reduce((s,i)=>s+i.price,0).toLocaleString()}원</span>
                     </div>
-                    <button onClick={handlePlaceOrder} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-slate-200 active:scale-95 transition-all">ORDER</button>
+                    <button onClick={handlePlaceOrder} className="w-full py-4 sm:py-5 lg:py-6 bg-slate-900 text-white rounded-[1.4rem] sm:rounded-[2rem] font-black text-lg sm:text-xl shadow-xl shadow-slate-200 active:scale-95 transition-all">ORDER</button>
                 </div>
             </aside>
           </div>
         ) : (
-          <div className="h-full bg-[#F8FAFC] p-8 overflow-y-auto">
+          <div className="h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 overflow-y-auto">
             <div className="max-w-[1400px] mx-auto space-y-8">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col">
