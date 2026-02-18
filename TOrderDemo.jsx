@@ -179,7 +179,7 @@ const App = () => {
           <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-100">
             <Store className="text-white w-6 h-6" />
           </div>
-          <span className="font-black text-xl tracking-tight text-slate-800 uppercase">T-Order <span className="text-indigo-500">Premium</span></span>
+          <span className="font-black text-xl tracking-tight text-slate-800">테이블 오더링 시스템</span>
         </div>
         
         <div className="flex items-center gap-6">
@@ -411,6 +411,12 @@ const App = () => {
           </div>
         )}
       </main>
+
+      <footer className="bg-white border-t px-8 py-3 text-center text-sm text-slate-500 shrink-0">
+        <span className="font-bold text-slate-700">테이블 오더링 시스템</span>
+        <span className="mx-2 text-slate-300">|</span>
+        <span>Smart Dining Experience</span>
+      </footer>
     </div>
   );
 };
