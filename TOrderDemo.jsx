@@ -25,7 +25,9 @@ import {
   CreditCard,
   Wallet,
   Smartphone,
-  TrendingUp
+  TrendingUp,
+  Settings,
+  Plus
 } from 'lucide-react';
 
 // --- API 설정 ---
@@ -114,20 +116,31 @@ const TRANSLATIONS = {
   }
 };
 
-const MENU_DATA = [
+const INITIAL_MENU_DATA = [
   { id: 1, category: 'Main', name: { ko: '시그니처 채끝 스테이크', en: 'Signature Sirloin Steak', ja: '特製サーロイン', zh: '招牌牛排' }, price: 42000, img: '🥩' },
   { id: 2, category: 'Main', name: { ko: '수비드 토마호크', en: 'Sous-vide Tomahawk', ja: 'トマホーク', zh: '战斧牛排' }, price: 98000, img: '🍖' },
   { id: 3, category: 'Main', name: { ko: '트러플 콰트로 피자', en: 'Truffle Quattro Pizza', ja: 'トリュフピザ', zh: '松露披萨' }, price: 26000, img: '🍕' },
+  { id: 4, category: 'Main', name: { ko: '바질 봉골레 파스타', en: 'Basil Vongole Pasta', ja: 'ボンゴレパスタ', zh: '蛤蜊意面' }, price: 24000, img: '🍝' },
+  { id: 5, category: 'Main', name: { ko: '숯불 갈비 스테이크', en: 'Charcoal Galbi Steak', ja: '炭火カルビステーキ', zh: '炭烤排骨牛排' }, price: 36000, img: '🥓' },
   { id: 101, category: 'Side', name: { ko: '부라타 치즈 샐러드', en: 'Burrata Cheese Salad', ja: 'ブッラータ', zh: '布拉塔' }, price: 16000, img: '🥗' },
   { id: 102, category: 'Side', name: { ko: '트러플 감자튀김', en: 'Truffle Fries', ja: 'トリュフポテト', zh: '松露薯条' }, price: 9000, img: '🍟' },
+  { id: 103, category: 'Side', name: { ko: '치킨 윙 플래터', en: 'Chicken Wing Platter', ja: 'チキンウィング', zh: '鸡翅拼盘' }, price: 14000, img: '🍗' },
+  { id: 104, category: 'Side', name: { ko: '시저 샐러드', en: 'Caesar Salad', ja: 'シーザーサラダ', zh: '凯撒沙拉' }, price: 12000, img: '🥬' },
   { id: 201, category: 'Drink', name: { ko: '카베르네 소비뇽 (Red)', en: 'Cabernet Sauvignon', ja: '赤ワイン', zh: '红酒' }, price: 15000, img: '🍷' },
   { id: 205, category: 'Drink', name: { ko: '생맥주 (500ml)', en: 'Draft Beer', ja: '生ビール', zh: '扎啤' }, price: 8000, img: '🍺' },
+  { id: 206, category: 'Drink', name: { ko: '하이볼', en: 'Highball', ja: 'ハイボール', zh: '高球' }, price: 11000, img: '🥃' },
+  { id: 207, category: 'Drink', name: { ko: '레몬에이드', en: 'Lemonade', ja: 'レモネード', zh: '柠檬汽水' }, price: 7000, img: '🍋' },
 ];
+
+const INITIAL_TABLES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 const App = () => {
   const [lang, setLang] = useState('ko');
   const [activeView, setActiveView] = useState('admin');
   const [cart, setCart] = useState([]);
+  const [menuItems, setMenuItems] = useState(INITIAL_MENU_DATA);
+  const [tables, setTables] = useState(INITIAL_TABLES);
+  const [selectedTableNo, setSelectedTableNo] = useState(5);
   const [orders, setOrders] = useState([
     { id: 1001, tableNo: 3, items: [{ name: { ko: '호출: 물', en: 'Call: Water', ja: '水', zh: '水' }, price: 0 }], status: 'call', time: '14:20' },
     { id: 1002, tableNo: 7, items: [{ name: { ko: '시그니처 채끝 스테이크', en: 'Steak', ja: 'ステーキ', zh: '牛排' }, price: 42000 }], status: 'pending', time: '14:18' },
@@ -140,6 +153,9 @@ const App = () => {
   const [showCallModal, setShowCallModal] = useState(false);
   const [aiResponse, setAiResponse] = useState("");
   const [adminAiInsight, setAdminAiInsight] = useState("현재 피크 타임입니다. 주방 인력을 메인 스테이션에 집중 배치하고, 스테이크 주문이 밀리지 않도록 관리하세요.");
+  const [newTableNo, setNewTableNo] = useState('');
+  const [menuDraft, setMenuDraft] = useState({ category: 'Main', name: '', price: '', img: '🍽️' });
+  const [editingMenuId, setEditingMenuId] = useState(null);
 
   const t = TRANSLATIONS[lang] || TRANSLATIONS.ko;
 
@@ -147,7 +163,7 @@ const App = () => {
     if (cart.length === 0) return;
     const newOrder = {
       id: Date.now(),
-      tableNo: 5,
+      tableNo: selectedTableNo,
       items: [...cart],
       totalPrice: cart.reduce((s, i) => s + i.price, 0),
       status: 'pending',
@@ -172,6 +188,63 @@ const App = () => {
     }, 1500);
   };
 
+  const handleSaveMenu = () => {
+    if (!menuDraft.name.trim() || !menuDraft.price) return;
+    const payload = {
+      id: editingMenuId ?? Date.now(),
+      category: menuDraft.category,
+      name: {
+        ko: menuDraft.name,
+        en: menuDraft.name,
+        ja: menuDraft.name,
+        zh: menuDraft.name,
+      },
+      price: Number(menuDraft.price),
+      img: menuDraft.img || '🍽️',
+    };
+
+    if (editingMenuId) {
+      setMenuItems(menuItems.map((item) => item.id === editingMenuId ? payload : item));
+    } else {
+      setMenuItems([...menuItems, payload]);
+    }
+
+    setMenuDraft({ category: 'Main', name: '', price: '', img: '🍽️' });
+    setEditingMenuId(null);
+  };
+
+  const handleEditMenu = (item) => {
+    setEditingMenuId(item.id);
+    setMenuDraft({
+      category: item.category,
+      name: item.name.ko,
+      price: String(item.price),
+      img: item.img,
+    });
+  };
+
+  const handleDeleteMenu = (id) => {
+    setMenuItems(menuItems.filter((item) => item.id !== id));
+    setCart(cart.filter((item) => item.id !== id));
+  };
+
+  const handleAddTable = () => {
+    const no = Number(newTableNo);
+    if (!no || tables.includes(no)) return;
+    setTables([...tables, no].sort((a, b) => a - b));
+    setNewTableNo('');
+  };
+
+  const handleDeleteTable = (tableNo) => {
+    if (tables.length === 1) return;
+    const nextTables = tables.filter((no) => no !== tableNo);
+    setTables(nextTables);
+    setOrders(orders.filter((order) => order.tableNo !== tableNo));
+    if (selectedTableNo === tableNo) {
+      setSelectedTableNo(nextTables[0]);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden">
       <header className="bg-white border-b px-8 py-4 flex justify-between items-center z-50 shrink-0">
@@ -191,6 +264,7 @@ const App = () => {
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                 <button onClick={() => setActiveView('customer')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeView === 'customer' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}><Users size={16}/> User</button>
                 <button onClick={() => setActiveView('admin')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeView === 'admin' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}><LayoutDashboard size={16}/> Admin</button>
+                <button onClick={() => setActiveView('master')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${activeView === 'master' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}><Settings size={16}/> Master</button>
             </div>
         </div>
       </header>
@@ -212,10 +286,12 @@ const App = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="mb-10 flex justify-between items-center">
                         <h2 className="text-4xl font-black text-slate-900">{activeCategory === 'Main' ? t.dining : activeCategory === 'Side' ? t.sideDish : t.drinkRec}</h2>
-                        <div className="px-6 py-2 bg-indigo-50 text-indigo-600 rounded-full font-bold border border-indigo-100">{t.table} 05</div>
+                        <select value={selectedTableNo} onChange={(e) => setSelectedTableNo(Number(e.target.value))} className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-full font-bold border border-indigo-100">
+                          {tables.map((tableNo) => <option key={tableNo} value={tableNo}>{t.table} {String(tableNo).padStart(2, '0')}</option>)}
+                        </select>
                     </div>
                     <div className="grid grid-cols-2 gap-8">
-                        {MENU_DATA.filter(m => m.category === activeCategory).map(item => (
+                        {menuItems.filter(m => m.category === activeCategory).map(item => (
                             <div key={item.id} onClick={() => setCart([...cart, item])} className="p-6 bg-slate-50 rounded-[2.5rem] border-2 border-transparent hover:border-indigo-500 hover:bg-white transition-all cursor-pointer flex items-center gap-6 group">
                                 <div className="text-5xl group-hover:scale-110 transition-transform">{item.img}</div>
                                 <div>
@@ -248,7 +324,7 @@ const App = () => {
                 </div>
             </aside>
           </div>
-        ) : (
+        ) : activeView === 'admin' ? (
           <div className="h-full bg-[#F8FAFC] p-8 overflow-y-auto">
             <div className="max-w-[1400px] mx-auto space-y-8">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -360,6 +436,50 @@ const App = () => {
                          <button onClick={() => handleStatusChange(order.id)} className={`flex-1 py-5 rounded-[1.5rem] font-black text-sm text-white shadow-lg ${order.status === 'call' ? 'bg-rose-600' : 'bg-indigo-600'}`}>
                            <CheckCircle size={18} className="inline mr-2"/> {order.status === 'call' ? t.confirm : t.startCook}
                          </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="h-full bg-[#F8FAFC] p-8 overflow-y-auto">
+            <div className="max-w-[1200px] mx-auto space-y-8 pb-20">
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h3 className="text-2xl font-black mb-6">마스터 페이지 · 테이블 관리</h3>
+                <div className="flex gap-3 mb-6">
+                  <input value={newTableNo} onChange={(e) => setNewTableNo(e.target.value)} type="number" min="1" placeholder="추가할 테이블 번호" className="px-4 py-3 border rounded-xl w-60" />
+                  <button onClick={handleAddTable} className="px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2"><Plus size={16}/> 테이블 추가</button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {tables.map((tableNo) => (
+                    <div key={tableNo} className="p-4 border rounded-2xl flex items-center justify-between bg-slate-50">
+                      <span className="font-black">T-{tableNo}</span>
+                      <button onClick={() => handleDeleteTable(tableNo)} className="text-rose-500"><Trash2 size={16}/></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h3 className="text-2xl font-black mb-6">마스터 페이지 · 메뉴 관리</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+                  <select value={menuDraft.category} onChange={(e) => setMenuDraft({ ...menuDraft, category: e.target.value })} className="px-4 py-3 border rounded-xl">
+                    {['Main', 'Side', 'Drink'].map((category) => <option key={category} value={category}>{category}</option>)}
+                  </select>
+                  <input value={menuDraft.name} onChange={(e) => setMenuDraft({ ...menuDraft, name: e.target.value })} placeholder="메뉴명" className="px-4 py-3 border rounded-xl" />
+                  <input value={menuDraft.price} onChange={(e) => setMenuDraft({ ...menuDraft, price: e.target.value })} placeholder="가격" type="number" min="0" className="px-4 py-3 border rounded-xl" />
+                  <input value={menuDraft.img} onChange={(e) => setMenuDraft({ ...menuDraft, img: e.target.value })} placeholder="이모지" className="px-4 py-3 border rounded-xl" />
+                </div>
+                <button onClick={handleSaveMenu} className="px-5 py-3 bg-slate-900 text-white rounded-xl font-bold mb-6">{editingMenuId ? '메뉴 수정 저장' : '메뉴 추가'}</button>
+                <div className="space-y-3">
+                  {menuItems.map((item) => (
+                    <div key={item.id} className="p-4 border rounded-2xl flex items-center justify-between">
+                      <div className="font-bold">{item.img} [{item.category}] {item.name.ko} · {item.price.toLocaleString()}원</div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleEditMenu(item)} className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 text-sm font-bold">수정</button>
+                        <button onClick={() => handleDeleteMenu(item.id)} className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 text-sm font-bold">삭제</button>
                       </div>
                     </div>
                   ))}
